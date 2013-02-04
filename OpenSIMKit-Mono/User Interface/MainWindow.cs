@@ -12,6 +12,11 @@ namespace OpenSIMKitMono
 
 		private SmartMouseReader SMReader = new SmartMouseReader();
 		private PcscReader PReader = new PcscReader();
+		
+		private enum SelectedConnectionType {SerialPortConnection, PCSCConnection};
+		
+		private SelectedConnectionType ConnectionType;
+		private bool ConnectionActive = false;
 
 		// Constructor and Destructor
 
@@ -70,6 +75,9 @@ namespace OpenSIMKitMono
 
 		[Widget]
 		Button ExitButton;
+		
+		[Widget]
+		Button ConnectButton;
 
 		[Widget]
 		ComboBox BitsPerSecondComboBox;
@@ -167,14 +175,68 @@ namespace OpenSIMKitMono
 
 		public void ConnectButton_Clicked(System.Object Obj, EventArgs args)
 		{
-
+			if(!ConnectionActive) {
+				
+				// Instantiate a connection
+				
+				if(SerialPortRadioButton.Active) {
+					ConnectionType = SelectedConnectionType.SerialPortConnection;
+					
+					// Set values for the Smart Mouse Reader to use
+					
+					SMReader.PortName = SerialPortComboBox.ActiveText.Trim();
+					SMReader.PortSpeed = Convert.ToInt32(BitsPerSecondComboBox.ActiveText.Trim());
+					SMReader.PortDataBit = Convert.ToInt32(DataBitsComboBox.ActiveText.Trim());
+					SMReader.PortParity = ParityComboBox.ActiveText.Trim();
+					SMReader.PortStopBit = Convert.ToInt32(StopBitsComboBox.ActiveText.Trim());
+					
+					SMReader.ApplySettings();
+					SMReader.PortObject.Open ();
+				}
+				else if(PCSCReaderRadioButton.Active) {
+					ConnectionType = SelectedConnectionType.PCSCConnection;
+				}
+				
+				ConnectionActive = true;
+				
+				SerialPortRadioButton.Sensitive = false;
+				PCSCReaderRadioButton.Sensitive = false;
+				
+				ConnectButton.Label = "Disconnect";
+			}
+			else {
+				
+				// Close up the connection
+				
+				switch(ConnectionType) {
+				case (SelectedConnectionType.SerialPortConnection):
+					
+					if(SMReader.IsPortOpen)
+					{
+						SMReader.CloseConnection();
+					}
+					
+					break;
+				case(SelectedConnectionType.PCSCConnection):
+					
+					PReader.CloseConnection();
+					
+					break;
+				}
+				
+				ConnectionActive = false;
+				SerialPortRadioButton.Sensitive = true;
+				PCSCReaderRadioButton.Sensitive = true;
+				
+				ConnectButton.Label = "Connect";
+			}
 		}
 
 		// Save Config button clicked
 
 		public void SaveConfigButton_Clicked(System.Object Obj, EventArgs args)
 		{
-			
+			// TODO: Save config
 		}
 
 		// Save to PC button clicked

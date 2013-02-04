@@ -95,6 +95,11 @@ namespace comexbase
 			set	{	portSpeed = value;	}
 		}
 		
+		public SerialPort PortObject
+		{
+			get { return portObject; }
+		}
+		
 		#endregion Properties
 		
 		/// <summary>
