@@ -94,6 +94,12 @@ namespace OpenSIMKitMono
 		[Widget]
 		ComboBox FlowControlComboBox;
 
+		[Widget]
+		Entry CommandText;
+
+		[Widget]
+		TextView ResultsTextView;
+
 		// Utility functions
 
 		private void SetComboBoxIndex(ref ComboBox CB, int Index)
@@ -191,6 +197,10 @@ namespace OpenSIMKitMono
 					SMReader.PortStopBit = Convert.ToInt32(StopBitsComboBox.ActiveText.Trim());
 					
 					SMReader.ApplySettings();
+
+					// Connect
+					Console.WriteLine("Connecting to " + SMReader.PortName + "...");
+
 					SMReader.PortObject.Open ();
 				}
 				else if(PCSCReaderRadioButton.Active) {
@@ -251,6 +261,28 @@ namespace OpenSIMKitMono
 		public void CopyFromPCButton_Clicked(System.Object Obj, EventArgs args)
 		{
 			
+		}
+
+		// Execute an AT Command
+
+		public void ExecuteButton_Clicked(System.Object Obj, EventArgs args)
+		{
+			if(ConnectionActive) {
+				switch(ConnectionType) {
+				case SelectedConnectionType.SerialPortConnection:
+					string CommandResult = "";
+					string Command = "";
+
+					Command = CommandText.Text;
+					SMReader.SendReceive(Command, ref CommandResult);
+
+					ResultsTextView.Buffer.Text = CommandResult;
+
+					break;
+				case SelectedConnectionType.PCSCConnection:
+					break;
+				}
+			}
 		}
 	}
 }

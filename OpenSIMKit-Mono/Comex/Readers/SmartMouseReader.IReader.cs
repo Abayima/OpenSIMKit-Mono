@@ -8,19 +8,13 @@ namespace comexbase
 {
 	public partial class SmartMouseReader: IReader, IDisposable
 	{
-		
-		
-		
 		// Constants
 		private static readonly string typeName = "SmartMouse Serial";
 		
 		
 		// Attributes
 		List<string> readers = new List<string>();
-		
-		
-		
-		
+
 		#region IReader interface
 		
 		
@@ -34,7 +28,6 @@ namespace comexbase
 		}
 
 		
-		
 		/// <summary>
 		/// Get managed reader type name
 		/// </summary>
@@ -42,8 +35,6 @@ namespace comexbase
 		{
 			get {	return typeName;	}
 		}
-		
-		
 		
 		/// <summary>
 		/// Get serial ports available
@@ -53,9 +44,6 @@ namespace comexbase
 			get {	return readers; }
 		}
 
-		
-		
-		
 		/// <summary>
 		/// Power On smartcard
 		/// </summary>
@@ -112,15 +100,7 @@ namespace comexbase
 				return e.Message;
 			}
 			
-			
-			
-			
-			
-			
 		}
-		
-		
-		
 		
 		/// <summary>
 		/// Exchange data with smartcard
@@ -143,9 +123,6 @@ namespace comexbase
 			}
 		}
 		
-		
-		
-		
 		/// <summary>
 		/// Close serial communication
 		/// </summary>
@@ -166,21 +143,6 @@ namespace comexbase
 				}
 			}
 		}
-		
-		
-		
-		
-		
-		
-		#endregion IReader interface
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		#endregion IReader interface	
 	}
 }
