@@ -3,6 +3,7 @@ using Glade;
 using Gtk;
 using comexbase;
 using System.Collections.Generic;
+using OpenSIMKit.Utilities;
 
 namespace OpenSIMKitMono
 {
@@ -99,6 +100,9 @@ namespace OpenSIMKitMono
 
 		[Widget]
 		TextView ResultsTextView;
+		TreeViewColumn TVMessageColumn;
+		ListStore MessageListStore = new ListStore(typeof(string));
+		CellRendererText MessageCellText = new CellRendererText();
 
 		// Utility functions
 
@@ -114,6 +118,17 @@ namespace OpenSIMKitMono
 			Gtk.TreeIter Iter;
 			CB.Model.IterNthChild(out Iter, Index);
 			CB.Model.SetValue (Iter, 0, Item);
+		}
+
+		public static byte[] StringToByteArray(String HexString)
+		{
+			int NumberChars = HexString.Length;
+			byte[] bytes = new byte[NumberChars / 2];
+			for (int i = 0; i < NumberChars; i += 2)
+			{
+				bytes[i / 2] = Convert.ToByte(HexString.Substring(i, 2), 16);
+			}
+			return bytes;
 		}
 
 		// Populates the list of serial ports
@@ -162,14 +177,28 @@ namespace OpenSIMKitMono
 
 		private void InitializeControls ()
 		{
+			// Serial ports list and PCSC Readers list
+
 			PopulateSerialPortList();
 			PopulatePCSCReaderList();
+
+			// Combo boxes
 
 			SetComboBoxIndex(ref BitsPerSecondComboBox, 6);
 			SetComboBoxIndex(ref DataBitsComboBox, 3);
 			SetComboBoxIndex(ref ParityComboBox, 0);
 			SetComboBoxIndex(ref StopBitsComboBox, 0);
 			SetComboBoxIndex(ref FlowControlComboBox, 2);
+
+			// Tree view
+
+			TVMessageColumn = new TreeViewColumn();
+			TVMessageColumn.Title = "Messages";
+
+			MessagesTreeView.AppendColumn(TVMessageColumn);
+			MessagesTreeView.Model = MessageListStore;
+			TVMessageColumn.PackStart (MessageCellText, true);
+			TVMessageColumn.AddAttribute(MessageCellText, "text", 0);
 
 			// Relevant sizes
 			MainDialogWindow.SetSizeRequest(1000, 500);
@@ -201,7 +230,11 @@ namespace OpenSIMKitMono
 					// Connect
 					Console.WriteLine("Connecting to " + SMReader.PortName + "...");
 
-					SMReader.PortObject.Open ();
+					string ConnectionResponse = "";
+
+					SMReader.AnswerToReset(ref ConnectionResponse);
+
+					Console.WriteLine("AnswerToReset response: " + ConnectionResponse);
 				}
 				else if(PCSCReaderRadioButton.Active) {
 					ConnectionType = SelectedConnectionType.PCSCConnection;
@@ -224,6 +257,8 @@ namespace OpenSIMKitMono
 					if(SMReader.IsPortOpen)
 					{
 						SMReader.CloseConnection();
+
+						Console.WriteLine("Disconnected from " + SMReader.PortName);
 					}
 					
 					break;
@@ -247,6 +282,52 @@ namespace OpenSIMKitMono
 		public void SaveConfigButton_Clicked(System.Object Obj, EventArgs args)
 		{
 			// TODO: Save config
+		}
+
+		// Gets messages from SIM Card
+		
+		public void GetSIMMessagesButton_Clicked(System.Object Obj, EventArgs args)
+		{
+			List<string> Messages = new List<string>();
+
+			if(ConnectionActive)
+			{
+				SerialPortUtility SerialUtility = new SerialPortUtility(SMReader.PortObject);
+
+				int CurrentMessage = 1;
+				bool ReadStatus = true;
+
+				do {
+					String Message = SerialUtility.ReadMessage(CurrentMessage);
+					SMSUtilities SMSUtility = new SMSUtilities(Message, SMSUtilities.Direction.SMS_IN);
+
+					string ProcessedMessage = SMSUtility.ProcessedMessageText;
+
+					if(ProcessedMessage == null)
+					{
+						// Error encountered. Reached the end
+						ReadStatus = false;
+					}
+					else if(ProcessedMessage.Trim().Equals(SerialUtility.CurrentRunningCommand.Trim()))
+					{
+						// Get only stored messages
+						ReadStatus = false;
+					}
+					else 
+					{
+						// Add the item
+						Messages.Add (ProcessedMessage);
+					}
+
+					CurrentMessage ++;
+				}
+				while(ReadStatus);
+
+				foreach(string IndividualMessage  in Messages)
+				{
+					MessageListStore.AppendValues(IndividualMessage);
+				}
+			}
 		}
 
 		// Save to PC button clicked
@@ -273,8 +354,10 @@ namespace OpenSIMKitMono
 					string CommandResult = "";
 					string Command = "";
 
-					Command = CommandText.Text;
-					SMReader.SendReceive(Command, ref CommandResult);
+					Command = CommandText.Text.Trim() + "\r";
+
+					SerialPortUtility SerialUtility = new SerialPortUtility(SMReader.PortObject);
+					CommandResult = SerialUtility.RunCustomCommand(Command);
 
 					ResultsTextView.Buffer.Text = CommandResult;
 
