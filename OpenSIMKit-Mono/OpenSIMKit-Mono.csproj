@@ -46,6 +46,7 @@
       <LogicalName>gui.stetic</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="glade-gui\MainWindow.glade" />
+    <EmbeddedResource Include="glade-gui\MessageManager.glade" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="gtk-gui\generated.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Framework\Utilities\SerialPortUtility.cs" />
     <Compile Include="Framework\Utilities\SerialPortUtilityException.cs" />
     <Compile Include="Framework\Utilities\SMSUtilities.cs" />
+    <Compile Include="User Interface\MessageManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

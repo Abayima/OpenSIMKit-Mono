@@ -2,10 +2,9 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.Workbench ActiveDocument="OpenSIMKit-Mono/User Interface/MainWindow.cs">
     <Files>
-      <File FileName="OpenSIMKit-Mono/Main.cs" Line="12" Column="27" />
-      <File FileName="OpenSIMKit-Mono/glade-gui/MainWindow.glade" Line="54" Column="24" />
-      <File FileName="OpenSIMKit-Mono/User Interface/MainWindow.cs" Line="28" Column="4" />
-      <File FileName="OpenSIMKit-Mono/Comex/Classes/LanguageManager.cs" Line="18" Column="27" />
+      <File FileName="OpenSIMKit-Mono/User Interface/MainWindow.cs" Line="292" Column="4" />
+      <File FileName="OpenSIMKit-Mono/Framework/Utilities/SerialPortUtility.cs" Line="165" Column="4" />
+      <File FileName="OpenSIMKit-Mono/Framework/Utilities/SMSUtilities.cs" Line="42" Column="26" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -19,6 +19,8 @@ namespace OpenSIMKitMono
 		private SelectedConnectionType ConnectionType;
 		private bool ConnectionActive = false;
 
+		private string [] commandLineArgs;
+
 		// Constructor and Destructor
 
 		public MainWindow (string[] arg)
@@ -26,6 +28,8 @@ namespace OpenSIMKitMono
 			Glade.XML gxml = new Glade.XML(null, "OpenSIMKitMono.glade-gui.MainWindow.glade", "MainDialogWindow", null);
 			gxml.Autoconnect(this);
 			InitializeControls();
+
+			commandLineArgs = arg;
 		}
 
 		// Frame handler
@@ -292,42 +296,59 @@ namespace OpenSIMKitMono
 
 			if(ConnectionActive)
 			{
-				SerialPortUtility SerialUtility = new SerialPortUtility(SMReader.PortObject);
-
-				int CurrentMessage = 1;
-				bool ReadStatus = true;
-
-				do {
-					String Message = SerialUtility.ReadMessage(CurrentMessage);
-					SMSUtilities SMSUtility = new SMSUtilities(Message, SMSUtilities.Direction.SMS_IN);
-
-					string ProcessedMessage = SMSUtility.ProcessedMessageText;
-
-					if(ProcessedMessage == null)
-					{
-						// Error encountered. Reached the end
-						ReadStatus = false;
+				switch(ConnectionType) {
+				case SelectedConnectionType.SerialPortConnection:
+					SerialPortUtility SerialUtility = new SerialPortUtility(SMReader.PortObject);
+					
+					int CurrentMessage = 1;
+					bool ReadStatus = true;
+					
+					do {
+						String Message = SerialUtility.ReadMessage(CurrentMessage);
+						SMSUtilities SMSUtility = new SMSUtilities(Message, SMSUtilities.Direction.SMS_IN);
+						
+						string ProcessedMessage = SMSUtility.ProcessedMessageText;
+						
+						if(ProcessedMessage == null)
+						{
+							// Error encountered. Reached the end
+							ReadStatus = false;
+						}
+						else if(ProcessedMessage.Trim().Equals(SerialUtility.CurrentRunningCommand.Trim()))
+						{
+							// Get only stored messages
+							ReadStatus = false;
+						}
+						else 
+						{
+							// Add the item
+							Messages.Add (ProcessedMessage);
+						}
+						
+						CurrentMessage ++;
 					}
-					else if(ProcessedMessage.Trim().Equals(SerialUtility.CurrentRunningCommand.Trim()))
-					{
-						// Get only stored messages
-						ReadStatus = false;
-					}
-					else 
-					{
-						// Add the item
-						Messages.Add (ProcessedMessage);
-					}
-
-					CurrentMessage ++;
+					while(ReadStatus);
+					break;
+				case SelectedConnectionType.PCSCConnection:
+					// TODO: Implement PCSC functionality for the messages list
+					break;
 				}
-				while(ReadStatus);
+				
+
+				// Populate messages
 
 				foreach(string IndividualMessage  in Messages)
 				{
 					MessageListStore.AppendValues(IndividualMessage);
 				}
 			}
+		}
+
+		// Manage PC Messages Button Clicked
+		
+		public void ManagePCMessagesButton_Clicked(System.Object Obj, EventArgs args)
+		{
+			MessageManager MessageManagerDialog = new MessageManager(commandLineArgs);
 		}
 
 		// Save to PC button clicked
@@ -363,6 +384,7 @@ namespace OpenSIMKitMono
 
 					break;
 				case SelectedConnectionType.PCSCConnection:
+					// TODO: Implement functionality for the PCSC readers
 					break;
 				}
 			}
