@@ -1,10 +1,9 @@
 using System;
 using System.IO;
-using System.Xml;
+using System.Collections.Generic;
 using Glade;
 using Gtk;
-using System.Collections.Generic;
-using System.Reflection;
+using OpenSIMKit.Utilities;
 
 namespace OpenSIMKitMono
 {
@@ -13,24 +12,11 @@ namespace OpenSIMKitMono
 
 		// Member variables
 
-		private XmlDocument MyXmlDocument;
-		private string ContactText;
-		private XmlNode ContactDataNode;
-		private XmlNode MessagesNode;
-		private string ExecutablePath = "";
+		private XMLUtilities xmlUtilities = new XMLUtilities();
 
 		private TreeViewColumn MessagesColumn = new TreeViewColumn();
 		private ListStore MessagesListStore = new ListStore(typeof(string));
 		private CellRendererText MessageCellText = new CellRendererText();
-
-		// Constants
-
-		private const string MessagesFile = "Messages.xml";
-		private const string MessageDataTag = "messagedata";
-		private const string MessageSourceTag = "messagesource";
-		private const string MessageTag = "message";
-		private const string MessagesTag = "messages";
-		private const string ContactTag = "contact";
 
 		// Constructors
 
@@ -39,18 +25,7 @@ namespace OpenSIMKitMono
 			Glade.XML gxml = new Glade.XML(null, "OpenSIMKitMono.glade-gui.MessageManager.glade", "MessagesDialog", null);
 			gxml.Autoconnect(this);
 
-			ExecutablePath = Assembly.GetExecutingAssembly().Location;
-
-			// Create the file if it does not exist
-
-			CreateXMLFile();
-
 			// Load the XML document
-
-			MyXmlDocument = new XmlDocument();
-			MyXmlDocument.Load (ExecutablePath + "-" + MessagesFile);
-			ContactDataNode = MyXmlDocument.SelectSingleNode("//" +MessageDataTag + "/" + ContactTag);
-			MessagesNode = MyXmlDocument.SelectSingleNode("//" +MessageDataTag + "/" + MessagesTag);
 
 			InitializeControls();
 		}
@@ -81,22 +56,6 @@ namespace OpenSIMKitMono
 		[Widget]
 		TreeView MessagesTreeView;
 
-		// Utility functions
-
-		private void CreateXMLFile()
-		{
-			FileInfo XMLFile = new FileInfo(ExecutablePath + "-" + MessagesFile);
-
-			if(!XMLFile.Exists)
-			{
-				StreamWriter SW = XMLFile.CreateText();
-				SW.WriteLine("<?xml version='1.0'?>");
-				SW.WriteLine("<" + MessageDataTag + ">");
-				SW.WriteLine("</" + MessageDataTag + ">");
-				SW.Close();
-			}
-		}
-
 		private void InitializeControls()
 		{
 			MessagesTreeView.Model = MessagesListStore;
@@ -113,55 +72,34 @@ namespace OpenSIMKitMono
 
 		private void SaveXMLFile()
 		{
-			ContactText = ContactTextEntry.Text;
-			XmlWriter MyXmlWriter = XmlWriter.Create(ExecutablePath + "-" + MessagesFile);
+			List<string> Messages = new List<string>();
 
-			MyXmlWriter.WriteStartElement (MessageDataTag);
-
-			MyXmlWriter.WriteStartElement (ContactTag);
-			MyXmlWriter.WriteValue(ContactText);
-			MyXmlWriter.WriteEndElement();
-
-			MyXmlWriter.WriteStartElement (MessagesTag);
-
-			int Count = 1;
+			int CurrentIndex = 0;
 
 			foreach(object [] MessageRow in MessagesListStore)
 			{
-				MyXmlWriter.WriteStartElement(MessageTag + "_" + Count.ToString());
-				MyXmlWriter.WriteValue (MessageRow[0]);
-				MyXmlWriter.WriteEndElement();
-
-				Count ++;
+				Messages.Add(MessageRow[0].ToString());
+				CurrentIndex ++;
 			}
 
-			MyXmlWriter.WriteEndElement();
-			MyXmlWriter.WriteEndElement();
-
-			MyXmlWriter.WriteEndDocument();
-			MyXmlWriter.Flush();
-
-			MyXmlWriter.Close();
+			xmlUtilities.SaveMessagesXMLFile (ContactTextEntry.Text, Messages);
 		}
 
 		private void LoadXMLFile()
 		{
-			if(ContactDataNode != null)
-			{
-				ContactTextEntry.Text = ContactDataNode.InnerText;
-				ContactText = ContactDataNode.InnerText;
-			}
+			xmlUtilities.LoadMessagesXMLFile();
+			ContactTextEntry.Text = xmlUtilities.TheContactText;
 
-			LoadXMLToListStore ();
+			LoadXMLToListStore (xmlUtilities.TheStringArray);
 		}
 
-		private void LoadXMLToListStore()
+		private void LoadXMLToListStore(string [] MessageArray)
 		{
-			if(MessagesNode != null)
+			if(MessageArray != null)
 			{
-				foreach(XmlNode MessageNode in MessagesNode)
+				foreach(string Message in MessageArray)
 				{
-					MessagesListStore.AppendValues(MessageNode.InnerText);
+					MessagesListStore.AppendValues(Message);
 				}
 			}
 		}

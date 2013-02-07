@@ -72,6 +72,7 @@
     <Compile Include="Framework\Utilities\SerialPortUtilityException.cs" />
     <Compile Include="Framework\Utilities\SMSUtilities.cs" />
     <Compile Include="User Interface\MessageManager.cs" />
+    <Compile Include="Framework\Utilities\XMLUtilities.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
