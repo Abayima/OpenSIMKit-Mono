@@ -21,6 +21,10 @@ namespace OpenSIMKitMono
 
 		private string [] commandLineArgs;
 
+		private bool MessageListPopulated = false;
+
+		private List<string> Messages = new List<string>();
+
 		// Constructor and Destructor
 
 		public MainWindow (string[] arg)
@@ -296,8 +300,6 @@ namespace OpenSIMKitMono
 		
 		public void GetSIMMessagesButton_Clicked(System.Object Obj, EventArgs args)
 		{
-			List<string> Messages = new List<string>();
-
 			if(ConnectionActive)
 			{
 				switch(ConnectionType) {
@@ -306,6 +308,8 @@ namespace OpenSIMKitMono
 					
 					int CurrentMessage = 1;
 					bool ReadStatus = true;
+
+					MessageListPopulated = false;
 					
 					do {
 						String Message = SerialUtility.ReadMessage(CurrentMessage);
@@ -332,6 +336,9 @@ namespace OpenSIMKitMono
 						CurrentMessage ++;
 					}
 					while(ReadStatus);
+
+					MessageListPopulated = true;
+
 					break;
 				case SelectedConnectionType.PCSCConnection:
 					// TODO: Implement PCSC functionality for the messages list
@@ -359,7 +366,15 @@ namespace OpenSIMKitMono
 
 		public void SaveToPCButton_Clicked(System.Object Obj, EventArgs args)
 		{
+			if(!MessageListPopulated)
+			{
+				GetSIMMessagesButton_Clicked(Obj, args);
+			}
 
+			string ContactFrom = "OpenSIMKit";
+
+			XMLUtilities xmlUtilities = new XMLUtilities();
+			xmlUtilities.SaveMessagesXMLFile(ContactFrom, Messages); 
 		}
 
 		// Copy from PC button clicked
