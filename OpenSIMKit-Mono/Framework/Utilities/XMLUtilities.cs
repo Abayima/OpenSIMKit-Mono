@@ -15,7 +15,7 @@ namespace OpenSIMKit.Utilities
 		private XmlNode ContactDataNode;
 		private XmlNode MessagesNode;
 		private string ContactText;
-		private string [] StringArray;
+		private List<string> StringArray = new List<string>();
 
 		private string ExecutablePath;
 
@@ -106,13 +106,11 @@ namespace OpenSIMKit.Utilities
 		{
 			if(MessagesNode != null)
 			{
-				StringArray = new String[MessagesNode.ChildNodes.Count];
-
 				int CurrentArrayItem = 0;
 
 				foreach(XmlNode MessageNode in MessagesNode)
 				{
-					StringArray[CurrentArrayItem] = MessageNode.InnerText;
+					StringArray.Add (MessageNode.InnerText);
 					CurrentArrayItem ++;
 				}
 			}
@@ -124,7 +122,7 @@ namespace OpenSIMKit.Utilities
 
 		// Properties
 
-		public string [] TheStringArray
+		public List<string> TheStringArray
 		{
 			get { return StringArray; }
 		}

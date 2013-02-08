@@ -15,7 +15,15 @@ namespace OpenSIMKit.Utilities
 		const String CMD_SELECT_SIM_STORAGE = "AT+CPMS=\"SM\"\r";
 		const String CMD_READ_ALL_MESSAGES = "AT+CMGL=\"REC READ\"\r";
 		const String CMD_READ_MESSAGE = "AT+CMGR={{ message_index }}\r";
-		const String CMD_WRITE_MESSAGE_TO_MEMORY = "AT+CMGW=\"+254772011011\"\r\n{{ message }}\u001F\r";
+		const String CMD_DETAILED_ERRORS = "AT+CMEE=1";
+
+		// Full write command
+		const String CMD_WRITE_MESSAGE_TO_MEMORY = "AT+CMGW=\"{{ message_contact }}\"\r{{ message }}";
+
+		// Parial write command
+		const String CMD_REQUEST_WRITE_MESSAGE = "AT+CMGW=\"{{ message_contact }}\"\r";
+		const String CMD_DO_WRITE_AFTER_REQUEST = "{{ message }}";
+
 		List<string> Readers;
 		
 		// Variables
@@ -130,18 +138,29 @@ namespace OpenSIMKit.Utilities
 			FlushBuffers();
 			Thread.Sleep(150);
 
+			String Command_Set_Text_Format = CMD_SET_TEXT_MODE_FORMAT;
+			String Command_Set_Sim_Storage = CMD_SELECT_SIM_STORAGE;
+
+			mySerialPort.Write (Command_Set_Text_Format);
+			Thread.Sleep(150);
+			String Response = mySerialPort.ReadExisting();
+
+			mySerialPort.Write (Command_Set_Sim_Storage);
+			Thread.Sleep(150);
+			Response = mySerialPort.ReadExisting();
+
 			String Command = CMD_READ_MESSAGE.Replace("{{ message_index }}", Convert.ToString (MessageIndex));
 			CurrentCommand = Command;
 			
 			mySerialPort.Write (Command);
 			Thread.Sleep(150);
-			String Response = mySerialPort.ReadExisting();
+			Response = mySerialPort.ReadExisting();
 			
 			return Response;
 		}
 		
 		// Store a message
-		public String StoreMessage (String Message)
+		public String StoreMessage (String Contact, String Message)
 		{
 			if(!mySerialPort.IsOpen)
 				throw new SerialPortUtilityException("Serial port is not opened yet");
@@ -149,12 +168,30 @@ namespace OpenSIMKit.Utilities
 			FlushBuffers();
 			Thread.Sleep(150);
 
-			String Command = CMD_WRITE_MESSAGE_TO_MEMORY.Replace("{{ message }}", Message);
-			CurrentCommand = Command;
-			
-			mySerialPort.Write (Command);
+			String Command_Set_Text_Format = CMD_SET_TEXT_MODE_FORMAT;
+			String Command_Set_Sim_Storage = CMD_SELECT_SIM_STORAGE;
+			String Command_Request_Write = CMD_REQUEST_WRITE_MESSAGE.Replace("{{ message_contact }}", "+254722773772");
+			String Command_Write_Message = CMD_DO_WRITE_AFTER_REQUEST.Replace("{{ message }}", Message);
+			Command_Write_Message = Command_Write_Message + (char) 26;
+
+			mySerialPort.Write (Command_Set_Text_Format);
 			Thread.Sleep(150);
 			String Response = mySerialPort.ReadExisting();
+
+			mySerialPort.Write (Command_Set_Sim_Storage);
+			Thread.Sleep(150);
+			Response = mySerialPort.ReadExisting();
+
+			mySerialPort.Write (Command_Request_Write);
+			Thread.Sleep(150);
+			Response = mySerialPort.ReadExisting();
+
+			if(Response.Contains(">"))
+			{
+				mySerialPort.Write (Command_Write_Message);
+				Thread.Sleep(150);
+				Response = mySerialPort.ReadExisting();
+			}
 			
 			return Response;
 		}

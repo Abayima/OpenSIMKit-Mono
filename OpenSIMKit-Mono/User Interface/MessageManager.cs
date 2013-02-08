@@ -93,7 +93,7 @@ namespace OpenSIMKitMono
 			LoadXMLToListStore (xmlUtilities.TheStringArray);
 		}
 
-		private void LoadXMLToListStore(string [] MessageArray)
+		private void LoadXMLToListStore(List<string> MessageArray)
 		{
 			if(MessageArray != null)
 			{

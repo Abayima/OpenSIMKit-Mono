@@ -77,7 +77,7 @@ namespace comexbase
 				// Open serial communication
 				portObject.DtrEnable=true;
 				portObject.RtsEnable=false;
-				portObject.Handshake= Handshake.None;
+				portObject.Handshake= Handshake.RequestToSend;
 				portObject.PortName = portName;				
 				portObject.Open();
 				isPortOpen = true;

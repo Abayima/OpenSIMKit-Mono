@@ -70,7 +70,7 @@ namespace OpenSIMKitMono
 		TreeView MessagesTreeView;
 
 		[Widget]
-		Button SaveTPCButton;
+		Button SaveToPCButton;
 
 		[Widget]
 		Button CopyFromPCButton;
@@ -228,6 +228,10 @@ namespace OpenSIMKitMono
 					SMReader.PortDataBit = Convert.ToInt32(DataBitsComboBox.ActiveText.Trim());
 					SMReader.PortParity = ParityComboBox.ActiveText.Trim();
 					SMReader.PortStopBit = Convert.ToInt32(StopBitsComboBox.ActiveText.Trim());
+
+					SMReader.PortObject.DtrEnable = true;
+					SMReader.PortObject.RtsEnable = true;
+					SMReader.PortObject.Handshake = System.IO.Ports.Handshake.RequestToSend;
 					
 					SMReader.ApplySettings();
 
@@ -355,14 +359,43 @@ namespace OpenSIMKitMono
 
 		public void SaveToPCButton_Clicked(System.Object Obj, EventArgs args)
 		{
-			
+
 		}
 
 		// Copy from PC button clicked
 
 		public void CopyFromPCButton_Clicked(System.Object Obj, EventArgs args)
 		{
-			
+
+			if(ConnectionActive)
+			{
+				XMLUtilities MyXmlUtilites = new XMLUtilities();
+				List<string> Messages;
+				string Contact;
+				
+				MyXmlUtilites.LoadMessagesXMLFile();
+				Messages = MyXmlUtilites.TheStringArray;
+				Contact = MyXmlUtilites.TheContactText;
+
+				switch(ConnectionType)
+				{
+				case SelectedConnectionType.SerialPortConnection:
+					if(Contact != null && Messages != null) 
+					{
+						SerialPortUtility MySerialPortUtility = new SerialPortUtility(SMReader.PortObject);
+
+						foreach(string Message in Messages) 
+						{
+							// Save these messages to SIM card
+							MySerialPortUtility.StoreMessage(Contact, Message);
+						}
+					}
+					break;
+
+				case SelectedConnectionType.PCSCConnection:
+					break;
+				}
+			}
 		}
 
 		// Execute an AT Command
