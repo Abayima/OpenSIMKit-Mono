@@ -5,51 +5,51 @@ namespace OpenSIMKit.Utilities
 	public class SMSUtilities
 	{
 		public enum Direction {SMS_IN, SMS_OUT};
-		private Direction CurrentMessageDirection;
-		private string MessageString = "";
-		private string ProcessedMessage = "";
+		private Direction currentMessageDirection;
+		private string messageString = "";
+		private string processedMessage = "";
 
-		public SMSUtilities (string Message, Direction MessageDirection)
+		public SMSUtilities (string message, Direction messageDirection)
 		{
-			MessageString = Message;
+			messageString = message;
 
-			switch(MessageDirection) {
+			switch(messageDirection) {
 			case(Direction.SMS_IN):
-				CurrentMessageDirection = Direction.SMS_IN;
-				ProcessedMessage = ProcessINMessage();
+				currentMessageDirection = Direction.SMS_IN;
+				processedMessage = ProcessINMessage();
 				break;
 			case(Direction.SMS_OUT):
-				CurrentMessageDirection = Direction.SMS_OUT;
+				currentMessageDirection = Direction.SMS_OUT;
 				break;
 			}
 		}
 
 		private string ProcessINMessage()
 		{
-			char [] Seperators = new char []{'\r'};
-			string [] SplitMessages = MessageString.Split (Seperators);
-			int NumMessages = SplitMessages.GetUpperBound(0) + 1;
-			string MessageText = "";
-			int StringPosition = 4;
+			char [] seperators = new char []{'\r'};
+			string [] splitMessages = messageString.Split (seperators);
+			int numMessages = splitMessages.GetUpperBound(0) + 1;
+			string messageText = "";
+			int stringPosition = 4;
 
-			for(int SplitsLoop = (NumMessages - 1); SplitsLoop >= 0; SplitsLoop --)
+			for(int splitsLoop = (numMessages - 1); splitsLoop >= 0; splitsLoop --)
 			{
-				string TrimmedMessage = SplitMessages[SplitsLoop].Trim ();
-				if(TrimmedMessage != "")
+				string trimmedMessage = splitMessages[splitsLoop].Trim ();
+				if(trimmedMessage != "")
 				{
-					switch(StringPosition) {
+					switch(stringPosition) {
 					case 4:
-						if(TrimmedMessage == "ERROR")
+						if(trimmedMessage == "ERROR")
 							return null;
-						else if(TrimmedMessage == "OK")
-							StringPosition --;
+						else if(trimmedMessage == "OK")
+							stringPosition --;
 						break;
 
 					case 3:
-						ProcessedMessage = TrimmedMessage;
-						StringPosition --;
+						processedMessage = trimmedMessage;
+						stringPosition --;
 
-						return ProcessedMessage;
+						return processedMessage;
 						break;
 					}
 				}
@@ -69,20 +69,20 @@ namespace OpenSIMKit.Utilities
 			return hex;
 		}
 		
-		public string ConvertHexToString(string HexValue)
+		public string ConvertHexToString(string hexValue)
 		{
-			string StrValue = "";
-			while (HexValue.Length > 0)
+			string strValue = "";
+			while (hexValue.Length > 0)
 			{
-				StrValue += System.Convert.ToChar(System.Convert.ToUInt32(HexValue.Substring(0, 2), 16)).ToString();
-				HexValue = HexValue.Substring(2, HexValue.Length - 2);
+				strValue += System.Convert.ToChar(System.Convert.ToUInt32(hexValue.Substring(0, 2), 16)).ToString();
+				hexValue = hexValue.Substring(2, hexValue.Length - 2);
 			}
-			return StrValue;
+			return strValue;
 		}
 
-		public string ProcessedMessageText
+		public string ProcessedMessage
 		{
-			get { return ProcessedMessage; }
+			get { return processedMessage; }
 		}
 	}
 }

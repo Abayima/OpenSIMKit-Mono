@@ -14,9 +14,9 @@ namespace OpenSIMKitMono
 
 		private XMLUtilities xmlUtilities = new XMLUtilities();
 
-		private TreeViewColumn MessagesColumn = new TreeViewColumn();
-		private ListStore MessagesListStore = new ListStore(typeof(string));
-		private CellRendererText MessageCellText = new CellRendererText();
+		private TreeViewColumn messagesColumn = new TreeViewColumn();
+		private ListStore messagesListStore = new ListStore(typeof(string));
+		private CellRendererText messageCellText = new CellRendererText();
 
 		// Constructors
 
@@ -58,11 +58,11 @@ namespace OpenSIMKitMono
 
 		private void InitializeControls()
 		{
-			MessagesTreeView.Model = MessagesListStore;
-			MessagesColumn.Title = "Messages";
-			MessagesTreeView.AppendColumn(MessagesColumn);
-			MessagesColumn.PackStart(MessageCellText, true);
-			MessagesColumn.AddAttribute(MessageCellText, "text", 0);
+			MessagesTreeView.Model = messagesListStore;
+			messagesColumn.Title = "Messages";
+			MessagesTreeView.AppendColumn(messagesColumn);
+			messagesColumn.PackStart(messageCellText, true);
+			messagesColumn.AddAttribute(messageCellText, "text", 0);
 
 			MessagesDialog.SetSizeRequest(1000, 500);
 			MessagesDialog.Show();
@@ -72,34 +72,34 @@ namespace OpenSIMKitMono
 
 		private void SaveXMLFile()
 		{
-			List<string> Messages = new List<string>();
+			List<string> messages = new List<string>();
 
-			int CurrentIndex = 0;
+			int currentIndex = 0;
 
-			foreach(object [] MessageRow in MessagesListStore)
+			foreach(object [] messageRow in messagesListStore)
 			{
-				Messages.Add(MessageRow[0].ToString());
-				CurrentIndex ++;
+				messages.Add(messageRow[0].ToString());
+				currentIndex ++;
 			}
 
-			xmlUtilities.SaveMessagesXMLFile (ContactTextEntry.Text, Messages);
+			xmlUtilities.SaveMessagesXMLFile (ContactTextEntry.Text, messages);
 		}
 
 		private void LoadXMLFile()
 		{
 			xmlUtilities.LoadMessagesXMLFile();
-			ContactTextEntry.Text = xmlUtilities.TheContactText;
+			ContactTextEntry.Text = xmlUtilities.ContactText;
 
-			LoadXMLToListStore (xmlUtilities.TheStringArray);
+			LoadXMLToListStore (xmlUtilities.StringArray);
 		}
 
-		private void LoadXMLToListStore(List<string> MessageArray)
+		private void LoadXMLToListStore(List<string> messageArray)
 		{
-			if(MessageArray != null)
+			if(messageArray != null)
 			{
-				foreach(string Message in MessageArray)
+				foreach(string message in messageArray)
 				{
-					MessagesListStore.AppendValues(Message);
+					messagesListStore.AppendValues(message);
 				}
 			}
 		}
@@ -107,33 +107,33 @@ namespace OpenSIMKitMono
 		private void UpdateItem()
 		{
 
-			TreeIter Iter;
+			TreeIter iter;
 			
-			TreePath[] MyTreePath = MessagesTreeView.Selection.GetSelectedRows();
+			TreePath[] treePath = MessagesTreeView.Selection.GetSelectedRows();
 			
-			for (int i  = MyTreePath.Length; i > 0; i--)
+			for (int i  = treePath.Length; i > 0; i--)
 			{
-				MessagesListStore.GetIter(out Iter, MyTreePath[(i - 1)]);
-				MessagesListStore.SetValues(Iter, MessageTextEntry.Text);
+				messagesListStore.GetIter(out iter, treePath[(i - 1)]);
+				messagesListStore.SetValues(iter, MessageTextEntry.Text);
 			}
 		}
 
 		private void AddItem()
 		{
-			MessagesListStore.AppendValues(MessageTextEntry.Text);
+			messagesListStore.AppendValues(MessageTextEntry.Text);
 		}
 
 		private void DeleteItems()
 		{
-			TreeIter Iter;
+			TreeIter iter;
 			
-			TreePath[] MyTreePath = MessagesTreeView.Selection.GetSelectedRows();
+			TreePath[] treePath = MessagesTreeView.Selection.GetSelectedRows();
 			
-			for (int i  = MyTreePath.Length; i > 0; i--)
+			for (int i  = treePath.Length; i > 0; i--)
 			{
-				MessagesListStore.GetIter(out Iter, MyTreePath[(i - 1)]);
-				string value = (string)MessagesListStore.GetValue(Iter, 0);
-				MessagesListStore.Remove(ref Iter);
+				messagesListStore.GetIter(out iter, treePath[(i - 1)]);
+				string value = (string)messagesListStore.GetValue(iter, 0);
+				messagesListStore.Remove(ref iter);
 			}
 		}
 
@@ -141,9 +141,9 @@ namespace OpenSIMKitMono
 
 		public void AddButton_Clicked(System.Object Obj, EventArgs args)
 		{
-			string MessageToAdd = MessageTextEntry.Text;
+			string messageToAdd = MessageTextEntry.Text;
 
-			if(MessageToAdd.Trim () != "")
+			if(messageToAdd.Trim () != "")
 			{
 				AddItem();
 			}

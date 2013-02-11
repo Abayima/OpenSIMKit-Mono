@@ -11,26 +11,26 @@ namespace OpenSIMKit.Utilities
 
 		// Variables
 
-		private XmlDocument MyXmlDocument;
-		private XmlNode ContactDataNode;
-		private XmlNode MessagesNode;
-		private string ContactText;
-		private List<string> StringArray = new List<string>();
+		private XmlDocument xmlDocument;
+		private XmlNode contactDataNode;
+		private XmlNode messagesNode;
+		private string contactText;
+		private List<string> stringArray = new List<string>();
 
-		private string ExecutablePath;
+		private string executablePath;
 
-		private const string MessagesFile = "Messages.xml";
-		private const string MessageDataTag = "messagedata";
-		private const string MessageSourceTag = "messagesource";
-		private const string MessageTag = "message";
-		private const string MessagesTag = "messages";
-		private const string ContactTag = "contact";
+		private const string messagesFile = "Messages.xml";
+		private const string messageDataTag = "messagedata";
+		private const string messageSourceTag = "messagesource";
+		private const string messageTag = "message";
+		private const string messagesTag = "messages";
+		private const string contactTag = "contact";
 
 		// Constructor
 
 		public XMLUtilities ()
 		{
-			ExecutablePath = Assembly.GetExecutingAssembly().Location;
+			executablePath = Assembly.GetExecutingAssembly().Location;
 
 			CreateXMLFile ();
 		}
@@ -39,64 +39,64 @@ namespace OpenSIMKit.Utilities
 
 		private void CreateXMLFile()
 		{
-			FileInfo XMLFile = new FileInfo(ExecutablePath + "-" + MessagesFile);
+			FileInfo xmlFile = new FileInfo(executablePath + "-" + messagesFile);
 			
-			if(!XMLFile.Exists)
+			if(!xmlFile.Exists)
 			{
-				StreamWriter SW = XMLFile.CreateText();
-				SW.WriteLine("<?xml version='1.0'?>");
-				SW.WriteLine("<" + MessageDataTag + ">");
-				SW.WriteLine("</" + MessageDataTag + ">");
-				SW.Close();
+				StreamWriter sw = xmlFile.CreateText();
+				sw.WriteLine("<?xml version='1.0'?>");
+				sw.WriteLine("<" + messageDataTag + ">");
+				sw.WriteLine("</" + messageDataTag + ">");
+				sw.Close();
 			}
 		}
 
-		public void SaveMessagesXMLFile(string ContactText, List<string>Messages)
+		public void SaveMessagesXMLFile(string contactText, List<string>messages)
 		{
-			XmlWriter MyXmlWriter = XmlWriter.Create(ExecutablePath + "-" + MessagesFile);
+			XmlWriter xmlWriter = XmlWriter.Create(executablePath + "-" + messagesFile);
 			
-			MyXmlWriter.WriteStartElement (MessageDataTag);
+			xmlWriter.WriteStartElement (messageDataTag);
 			
-			MyXmlWriter.WriteStartElement (ContactTag);
-			MyXmlWriter.WriteValue(ContactText);
-			MyXmlWriter.WriteEndElement();
+			xmlWriter.WriteStartElement (contactTag);
+			xmlWriter.WriteValue(contactText);
+			xmlWriter.WriteEndElement();
 			
-			MyXmlWriter.WriteStartElement (MessagesTag);
+			xmlWriter.WriteStartElement (messagesTag);
 			
 			int Count = 1;
 			
-			foreach(string MessageRow in Messages)
+			foreach(string MessageRow in messages)
 			{
-				MyXmlWriter.WriteStartElement(MessageTag + "_" + Count.ToString());
-				MyXmlWriter.WriteValue (MessageRow);
-				MyXmlWriter.WriteEndElement();
+				xmlWriter.WriteStartElement(messageTag + "_" + Count.ToString());
+				xmlWriter.WriteValue (MessageRow);
+				xmlWriter.WriteEndElement();
 				
 				Count ++;
 			}
 			
-			MyXmlWriter.WriteEndElement();
-			MyXmlWriter.WriteEndElement();
+			xmlWriter.WriteEndElement();
+			xmlWriter.WriteEndElement();
 			
-			MyXmlWriter.WriteEndDocument();
-			MyXmlWriter.Flush();
+			xmlWriter.WriteEndDocument();
+			xmlWriter.Flush();
 			
-			MyXmlWriter.Close();
+			xmlWriter.Close();
 		}
 
 		public void LoadMessagesXMLFile()
 		{
-			MyXmlDocument = new XmlDocument();
-			MyXmlDocument.Load (ExecutablePath + "-" + MessagesFile);
-			ContactDataNode = MyXmlDocument.SelectSingleNode("//" +MessageDataTag + "/" + ContactTag);
-			MessagesNode = MyXmlDocument.SelectSingleNode("//" +MessageDataTag + "/" + MessagesTag);
+			xmlDocument = new XmlDocument();
+			xmlDocument.Load (executablePath + "-" + messagesFile);
+			contactDataNode = xmlDocument.SelectSingleNode("//" +messageDataTag + "/" + contactTag);
+			messagesNode = xmlDocument.SelectSingleNode("//" +messageDataTag + "/" + messagesTag);
 
-			if(ContactDataNode != null)
+			if(contactDataNode != null)
 			{
-				ContactText = ContactDataNode.InnerText;
+				contactText = contactDataNode.InnerText;
 			}
 			else
 			{
-				ContactText = null;
+				contactText = null;
 			}
 			
 			LoadMessagesXMLToStringArray();
@@ -104,32 +104,32 @@ namespace OpenSIMKit.Utilities
 
 		private void LoadMessagesXMLToStringArray()
 		{
-			if(MessagesNode != null)
+			if(messagesNode != null)
 			{
 				int CurrentArrayItem = 0;
 
-				foreach(XmlNode MessageNode in MessagesNode)
+				foreach(XmlNode MessageNode in messagesNode)
 				{
-					StringArray.Add (MessageNode.InnerText);
+					stringArray.Add (MessageNode.InnerText);
 					CurrentArrayItem ++;
 				}
 			}
 			else
 			{
-				StringArray = null;
+				stringArray = null;
 			}
 		}
 
 		// Properties
 
-		public List<string> TheStringArray
+		public List<string> StringArray
 		{
-			get { return StringArray; }
+			get { return stringArray; }
 		}
 
-		public string TheContactText
+		public string ContactText
 		{
-			get { return ContactText; }
+			get { return contactText; }
 		}
 	}
 }

@@ -11,19 +11,19 @@ namespace OpenSIMKitMono
 	{
 		// Private variables
 
-		private SmartMouseReader SMReader = new SmartMouseReader();
-		private PcscReader PReader = new PcscReader();
+		private SmartMouseReader smReader = new SmartMouseReader();
+		private PcscReader pReader = new PcscReader();
 		
 		private enum SelectedConnectionType {SerialPortConnection, PCSCConnection};
 		
-		private SelectedConnectionType ConnectionType;
-		private bool ConnectionActive = false;
+		private SelectedConnectionType connectionType;
+		private bool connectionActive = false;
 
 		private string [] commandLineArgs;
 
-		private bool MessageListPopulated = false;
+		private bool messageListPopulated = false;
 
-		private List<string> Messages = new List<string>();
+		private List<string> messages = new List<string>();
 
 		// Constructor and Destructor
 
@@ -108,33 +108,33 @@ namespace OpenSIMKitMono
 
 		[Widget]
 		TextView ResultsTextView;
-		TreeViewColumn TVMessageColumn;
-		ListStore MessageListStore = new ListStore(typeof(string));
-		CellRendererText MessageCellText = new CellRendererText();
+		TreeViewColumn tvMessageColumn;
+		ListStore messageListStore = new ListStore(typeof(string));
+		CellRendererText messageCellText = new CellRendererText();
 
 		// Utility functions
 
-		private void SetComboBoxIndex(ref ComboBox CB, int Index)
+		private void SetComboBoxIndex(ref ComboBox cb, int index)
 		{
 			Gtk.TreeIter Iter;
-			CB.Model.IterNthChild(out Iter, Index);
-			CB.SetActiveIter(Iter);
+			cb.Model.IterNthChild(out Iter, index);
+			cb.SetActiveIter(Iter);
 		}
 
-		private void AddItemToComboBox(ref ComboBox CB, int Index, string Item)
+		private void AddItemToComboBox(ref ComboBox cb, int index, string item)
 		{
 			Gtk.TreeIter Iter;
-			CB.Model.IterNthChild(out Iter, Index);
-			CB.Model.SetValue (Iter, 0, Item);
+			cb.Model.IterNthChild(out Iter, index);
+			cb.Model.SetValue (Iter, 0, item);
 		}
 
-		public static byte[] StringToByteArray(String HexString)
+		public static byte[] StringToByteArray(String hexString)
 		{
-			int NumberChars = HexString.Length;
+			int NumberChars = hexString.Length;
 			byte[] bytes = new byte[NumberChars / 2];
 			for (int i = 0; i < NumberChars; i += 2)
 			{
-				bytes[i / 2] = Convert.ToByte(HexString.Substring(i, 2), 16);
+				bytes[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
 			}
 			return bytes;
 		}
@@ -143,42 +143,42 @@ namespace OpenSIMKitMono
 
 		private void PopulateSerialPortList()
 		{
-			List<string> SerialReaders = SMReader.Readers;
-			string [] ReadersString = SerialReaders.ToArray();
+			List<string> serialReaders = smReader.Readers;
+			string [] readersString = serialReaders.ToArray();
 
-			ListStore ComboBoxStore = new ListStore (typeof (string)); 
+			ListStore comboBoxStore = new ListStore (typeof (string)); 
 
-			foreach(string ReaderString in ReadersString)
+			foreach(string ReaderString in readersString)
 			{
-				ComboBoxStore.AppendValues(ReaderString);
+				comboBoxStore.AppendValues(ReaderString);
 			}
 
-			CellRendererText CT = new CellRendererText(); 
-			SerialPortComboBox.PackStart(CT, false); 
-			SerialPortComboBox.AddAttribute(CT, "text", 0); 
+			CellRendererText ct = new CellRendererText(); 
+			SerialPortComboBox.PackStart(ct, false); 
+			SerialPortComboBox.AddAttribute(ct, "text", 0); 
 
-			SerialPortComboBox.Model = ComboBoxStore;
+			SerialPortComboBox.Model = comboBoxStore;
 		}
 
 		// Populates the list of PCSC readers
 
 		private void PopulatePCSCReaderList()
 		{
-			List<string> PCSCReaders = PReader.Readers;
-			string [] ReadersString = PCSCReaders.ToArray();
+			List<string> pcscReaders = pReader.Readers;
+			string [] readersString = pcscReaders.ToArray();
 			
-			ListStore ComboBoxStore = new ListStore (typeof (string)); 
+			ListStore comboBoxStore = new ListStore (typeof (string)); 
 			
-			foreach(string ReaderString in ReadersString)
+			foreach(string ReaderString in readersString)
 			{
-				ComboBoxStore.AppendValues(ReaderString);
+				comboBoxStore.AppendValues(ReaderString);
 			}
 			
-			CellRendererText CT = new CellRendererText(); 
-			PCSCReaderComboBox.PackStart(CT, false); 
-			PCSCReaderComboBox.AddAttribute(CT, "text", 0); 
+			CellRendererText ct = new CellRendererText(); 
+			PCSCReaderComboBox.PackStart(ct, false); 
+			PCSCReaderComboBox.AddAttribute(ct, "text", 0); 
 			
-			PCSCReaderComboBox.Model = ComboBoxStore;
+			PCSCReaderComboBox.Model = comboBoxStore;
 		}
 
 		// Initializes all controls
@@ -200,13 +200,13 @@ namespace OpenSIMKitMono
 
 			// Tree view
 
-			TVMessageColumn = new TreeViewColumn();
-			TVMessageColumn.Title = "Messages";
+			tvMessageColumn = new TreeViewColumn();
+			tvMessageColumn.Title = "Messages";
 
-			MessagesTreeView.AppendColumn(TVMessageColumn);
-			MessagesTreeView.Model = MessageListStore;
-			TVMessageColumn.PackStart (MessageCellText, true);
-			TVMessageColumn.AddAttribute(MessageCellText, "text", 0);
+			MessagesTreeView.AppendColumn(tvMessageColumn);
+			MessagesTreeView.Model = messageListStore;
+			tvMessageColumn.PackStart (messageCellText, true);
+			tvMessageColumn.AddAttribute(messageCellText, "text", 0);
 
 			// Relevant sizes
 			MainDialogWindow.SetSizeRequest(1000, 500);
@@ -216,43 +216,43 @@ namespace OpenSIMKitMono
 
 		// Connect button clicked
 
-		public void ConnectButton_Clicked(System.Object Obj, EventArgs args)
+		public void ConnectButton_Clicked(System.Object obj, EventArgs args)
 		{
-			if(!ConnectionActive) {
+			if(!connectionActive) {
 				
 				// Instantiate a connection
 				
 				if(SerialPortRadioButton.Active) {
-					ConnectionType = SelectedConnectionType.SerialPortConnection;
+					connectionType = SelectedConnectionType.SerialPortConnection;
 					
 					// Set values for the Smart Mouse Reader to use
 					
-					SMReader.PortName = SerialPortComboBox.ActiveText.Trim();
-					SMReader.PortSpeed = Convert.ToInt32(BitsPerSecondComboBox.ActiveText.Trim());
-					SMReader.PortDataBit = Convert.ToInt32(DataBitsComboBox.ActiveText.Trim());
-					SMReader.PortParity = ParityComboBox.ActiveText.Trim();
-					SMReader.PortStopBit = Convert.ToInt32(StopBitsComboBox.ActiveText.Trim());
+					smReader.PortName = SerialPortComboBox.ActiveText.Trim();
+					smReader.PortSpeed = Convert.ToInt32(BitsPerSecondComboBox.ActiveText.Trim());
+					smReader.PortDataBit = Convert.ToInt32(DataBitsComboBox.ActiveText.Trim());
+					smReader.PortParity = ParityComboBox.ActiveText.Trim();
+					smReader.PortStopBit = Convert.ToInt32(StopBitsComboBox.ActiveText.Trim());
 
-					SMReader.PortObject.DtrEnable = true;
-					SMReader.PortObject.RtsEnable = true;
-					SMReader.PortObject.Handshake = System.IO.Ports.Handshake.RequestToSend;
+					smReader.PortObject.DtrEnable = true;
+					smReader.PortObject.RtsEnable = true;
+					smReader.PortObject.Handshake = System.IO.Ports.Handshake.RequestToSend;
 					
-					SMReader.ApplySettings();
+					smReader.ApplySettings();
 
 					// Connect
-					Console.WriteLine("Connecting to " + SMReader.PortName + "...");
+					Console.WriteLine("Connecting to " + smReader.PortName + "...");
 
 					string ConnectionResponse = "";
 
-					SMReader.AnswerToReset(ref ConnectionResponse);
+					smReader.AnswerToReset(ref ConnectionResponse);
 
 					Console.WriteLine("AnswerToReset response: " + ConnectionResponse);
 				}
 				else if(PCSCReaderRadioButton.Active) {
-					ConnectionType = SelectedConnectionType.PCSCConnection;
+					connectionType = SelectedConnectionType.PCSCConnection;
 				}
 				
-				ConnectionActive = true;
+				connectionActive = true;
 				
 				SerialPortRadioButton.Sensitive = false;
 				PCSCReaderRadioButton.Sensitive = false;
@@ -263,25 +263,25 @@ namespace OpenSIMKitMono
 				
 				// Close up the connection
 				
-				switch(ConnectionType) {
+				switch(connectionType) {
 				case (SelectedConnectionType.SerialPortConnection):
 					
-					if(SMReader.IsPortOpen)
+					if(smReader.IsPortOpen)
 					{
-						SMReader.CloseConnection();
+						smReader.CloseConnection();
 
-						Console.WriteLine("Disconnected from " + SMReader.PortName);
+						Console.WriteLine("Disconnected from " + smReader.PortName);
 					}
 					
 					break;
 				case(SelectedConnectionType.PCSCConnection):
 					
-					PReader.CloseConnection();
+					pReader.CloseConnection();
 					
 					break;
 				}
 				
-				ConnectionActive = false;
+				connectionActive = false;
 				SerialPortRadioButton.Sensitive = true;
 				PCSCReaderRadioButton.Sensitive = true;
 				
@@ -291,38 +291,38 @@ namespace OpenSIMKitMono
 
 		// Save Config button clicked
 
-		public void SaveConfigButton_Clicked(System.Object Obj, EventArgs args)
+		public void SaveConfigButton_Clicked(System.Object obj, EventArgs args)
 		{
 			// TODO: Save config
 		}
 
 		// Gets messages from SIM Card
 		
-		public void GetSIMMessagesButton_Clicked(System.Object Obj, EventArgs args)
+		public void GetSIMMessagesButton_Clicked(System.Object obj, EventArgs args)
 		{
-			if(ConnectionActive)
+			if(connectionActive)
 			{
-				switch(ConnectionType) {
+				switch(connectionType) {
 				case SelectedConnectionType.SerialPortConnection:
-					SerialPortUtility SerialUtility = new SerialPortUtility(SMReader.PortObject);
+					SerialPortUtility SerialUtility = new SerialPortUtility(smReader.PortObject);
 					
 					int CurrentMessage = 1;
 					bool ReadStatus = true;
 
-					MessageListPopulated = false;
+					messageListPopulated = false;
 					
 					do {
 						String Message = SerialUtility.ReadMessage(CurrentMessage);
 						SMSUtilities SMSUtility = new SMSUtilities(Message, SMSUtilities.Direction.SMS_IN);
 						
-						string ProcessedMessage = SMSUtility.ProcessedMessageText;
+						string ProcessedMessage = SMSUtility.ProcessedMessage;
 						
 						if(ProcessedMessage == null)
 						{
 							// Error encountered. Reached the end
 							ReadStatus = false;
 						}
-						else if(ProcessedMessage.Trim().Equals(SerialUtility.CurrentRunningCommand.Trim()))
+						else if(ProcessedMessage.Trim().Equals(SerialUtility.CurrentCommand.Trim()))
 						{
 							// Get only stored messages
 							ReadStatus = false;
@@ -330,14 +330,14 @@ namespace OpenSIMKitMono
 						else 
 						{
 							// Add the item
-							Messages.Add (ProcessedMessage);
+							messages.Add (ProcessedMessage);
 						}
 						
 						CurrentMessage ++;
 					}
 					while(ReadStatus);
 
-					MessageListPopulated = true;
+					messageListPopulated = true;
 
 					break;
 				case SelectedConnectionType.PCSCConnection:
@@ -348,61 +348,61 @@ namespace OpenSIMKitMono
 
 				// Populate messages
 
-				foreach(string IndividualMessage  in Messages)
+				foreach(string IndividualMessage  in messages)
 				{
-					MessageListStore.AppendValues(IndividualMessage);
+					messageListStore.AppendValues(IndividualMessage);
 				}
 			}
 		}
 
 		// Manage PC Messages Button Clicked
 		
-		public void ManagePCMessagesButton_Clicked(System.Object Obj, EventArgs args)
+		public void ManagePCMessagesButton_Clicked(System.Object obj, EventArgs args)
 		{
 			MessageManager MessageManagerDialog = new MessageManager(commandLineArgs);
 		}
 
 		// Save to PC button clicked
 
-		public void SaveToPCButton_Clicked(System.Object Obj, EventArgs args)
+		public void SaveToPCButton_Clicked(System.Object obj, EventArgs args)
 		{
-			if(!MessageListPopulated)
+			if(!messageListPopulated)
 			{
-				GetSIMMessagesButton_Clicked(Obj, args);
+				GetSIMMessagesButton_Clicked(obj, args);
 			}
 
 			string ContactFrom = "OpenSIMKit";
 
 			XMLUtilities xmlUtilities = new XMLUtilities();
-			xmlUtilities.SaveMessagesXMLFile(ContactFrom, Messages); 
+			xmlUtilities.SaveMessagesXMLFile(ContactFrom, messages); 
 		}
 
 		// Copy from PC button clicked
 
-		public void CopyFromPCButton_Clicked(System.Object Obj, EventArgs args)
+		public void CopyFromPCButton_Clicked(System.Object obj, EventArgs args)
 		{
 
-			if(ConnectionActive)
+			if(connectionActive)
 			{
-				XMLUtilities MyXmlUtilites = new XMLUtilities();
-				List<string> Messages;
-				string Contact;
+				XMLUtilities xmlUtilites = new XMLUtilities();
+				List<string> messages;
+				string contact;
 				
-				MyXmlUtilites.LoadMessagesXMLFile();
-				Messages = MyXmlUtilites.TheStringArray;
-				Contact = MyXmlUtilites.TheContactText;
+				xmlUtilites.LoadMessagesXMLFile();
+				messages = xmlUtilites.StringArray;
+				contact = xmlUtilites.ContactText;
 
-				switch(ConnectionType)
+				switch(connectionType)
 				{
 				case SelectedConnectionType.SerialPortConnection:
-					if(Contact != null && Messages != null) 
+					if(contact != null && messages != null) 
 					{
-						SerialPortUtility MySerialPortUtility = new SerialPortUtility(SMReader.PortObject);
+						SerialPortUtility MySerialPortUtility = new SerialPortUtility(smReader.PortObject);
 
-						foreach(string Message in Messages) 
+						foreach(string Message in messages) 
 						{
 							// Save these messages to SIM card
-							MySerialPortUtility.StoreMessage(Contact, Message);
+							MySerialPortUtility.StoreMessage(contact, Message);
 						}
 					}
 					break;
@@ -415,17 +415,17 @@ namespace OpenSIMKitMono
 
 		// Execute an AT Command
 
-		public void ExecuteButton_Clicked(System.Object Obj, EventArgs args)
+		public void ExecuteButton_Clicked(System.Object obj, EventArgs args)
 		{
-			if(ConnectionActive) {
-				switch(ConnectionType) {
+			if(connectionActive) {
+				switch(connectionType) {
 				case SelectedConnectionType.SerialPortConnection:
 					string CommandResult = "";
 					string Command = "";
 
 					Command = CommandText.Text.Trim() + "\r";
 
-					SerialPortUtility SerialUtility = new SerialPortUtility(SMReader.PortObject);
+					SerialPortUtility SerialUtility = new SerialPortUtility(smReader.PortObject);
 					CommandResult = SerialUtility.RunCustomCommand(Command);
 
 					ResultsTextView.Buffer.Text = CommandResult;
